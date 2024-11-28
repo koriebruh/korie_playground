@@ -1,23 +1,47 @@
 services:
-  mysql-development:
-    container_name: mysql-db
+
+  mysql-playground:
+    container_name: mysql-playground
     image: mysql:latest
     ports:
       - "3307:3306"
     environment:
-      MYSQL_DATABASE: 'development'
+      MYSQL_DATABASE: 'playground'
       MYSQL_USER: 'korie'
       MYSQL_PASSWORD: 'korie123'
       MYSQL_ROOT_PASSWORD: 'korie123'
     volumes:
-      - mysql-development:/var/lib/mysql
+      - mysql-playground:/var/lib/mysql
 
-  redis-db:
-    container_name: redis-db
+  redis-playground:
+    container_name: redis-playground
     image: redis:latest
     ports:
       - "6379:6379"
     command: ["redis-server"] # Menjalankan Redis tanpa password
 
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:latest  # Kafka image yang mendukung KRaft mode
+    ports:
+      - "9092:9092"  # Port Kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    volumes:
+      - kafka-data:/var/lib/kafka/data   # Volume untuk menyimpan data Kafka secara persisten
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
 volumes:
-  mysql-development:
+  mysql-playground:
+  kafka-data:
